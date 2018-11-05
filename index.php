@@ -48,7 +48,7 @@ if($controller->isCreate()) {
             <th>email</th>
             <th>password</th>
         </tr>
-        <?=var_dump($users) ?>
+
         <?php foreach ($users as $user): ?>
             <tr>
                 <td><?php echo $user['id']; ?></td>

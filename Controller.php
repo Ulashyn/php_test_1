@@ -39,12 +39,9 @@ class Controller
     public function getAllUsers()
     {
         // query the users table and return all rows
-        $conn = new mysqli($this->getConfig('db_host'), $this->getConfig('db_username'), $this->getConfig('db_password'), $this->getConfig('db_name'));
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-        }
+
         $allUsers = "SELECT * FROM users";
-        return $conn->query($allUsers);
+        return $this->db->query($allUsers);
 
     }
 
@@ -53,13 +50,10 @@ class Controller
     {
         // query the users table and return only rows
         // where email is equal $mail
-        $conn = new mysqli($this->getConfig('db_host'), $this->getConfig('db_username'), $this->getConfig('db_password'), $this->getConfig('db_name'));
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-        }
+
         $email = "SELECT * FROM users WHERE email='$mail'";
 
-        return $conn->query($email);
+        return $this->db->query($email);
     }
 
     public function createUser()
@@ -73,29 +67,33 @@ class Controller
         }
 
         //validate the email field
-        if (true) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->createErrors[] = "The email field is required and must be a valid email address";
         }
 
         //if the email field is valid check if the email already exist
-        elseif(true) {
+        elseif(mysqli_num_rows($this->filterUsersByEmail($email)) > 0) {
             $this->createErrors[] = "User with this email already exist";
         }
 
         //check if the password field not empty
-        if (true) {
+        if (empty($password)) {
             // if the password is empty push message to the
             // "createErrors" array message
             $this->createErrors[] = "The password field is required";
         }
 
         // if the "createErrors" array not empty
-        if (true) {
-            // do not continue
+        if (!empty($this->createErrors)) {
+            return $this->createErrors;
         }
 
         //if everything is ok and there are no errors
         //insert the new row to the users table
+        if (empty($this->createErrors)) {
+          $insert = "INSERT INTO users (name, email, password) VALUES ('$name', '$email', MD5('$password'))";
+          $this->db->query($insert);
+        }
 
         //refresh the page and exit from the script
         header("Location: " . $_SERVER['REQUEST_URI']);
